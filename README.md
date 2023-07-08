@@ -1,6 +1,6 @@
 # Como ejecutar el proyecto Hola Amigos
 
-Lo primero a realizar es la descarga del zip, en el botón verde que dice `<Code>` saldrá desplegado varias opciones
+Lo primero a realizar es la descarga del zip, en el botón verde que dice `<Code>`, saldrá desplegado varias opciones
 
 La que es de interés es la última que dice Download "ZIP"
 
