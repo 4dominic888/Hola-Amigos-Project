@@ -1,15 +1,23 @@
+//Include principales
 #include "include/glad/glad.h"
 #include <GLFW/glfw3.h>
 #include "include/stb/stb_image.h"
 
+//Include complementarios
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
+//Include de fábrica
 #include <stdio.h>
 #include <iostream>
-#include <fstream>
-#include <string>
 #include <math.h>
 
+//Include creados
 #include "include/Shader.hpp"
+#include "include/Texture.hpp"
+
+using namespace glm;
 
 #define WIDTH 600
 #define HEIGH 600
@@ -17,10 +25,10 @@
 
 float vertices[] = {
 //   X        Y       Z         R     G     B         t1     t2
-    0.5f,   0.5f,    0.0f,     1.0f, 0.0f, 0.0f,     1.0f,  1.0f, 
-    0.5f,  -0.5f,    0.0f,     0.0f, 1.0f, 0.0f,     1.0f,  0.0f,
-   -0.5f,  -0.5f,    0.0f,     0.0f, 0.0f, 1.0f,     0.0f,  0.0f,
-   -0.5f,   0.5f,    0.0f,     1.0f, 0.0f, 0.0f,     0.0f,  1.0f 
+    0.5f,   0.5f,    0.0f,     1.0f, 1.0f, 1.0f,     1.0f,  1.0f, 
+    0.5f,  -0.5f,    0.0f,     1.0f, 1.0f, 1.0f,     1.0f,  0.0f,
+   -0.5f,  -0.5f,    0.0f,     1.0f, 1.0f, 1.0f,     0.0f,  0.0f,
+   -0.5f,   0.5f,    0.0f,     1.0f, 1.0f, 1.0f,     0.0f,  1.0f 
 };
 
 unsigned int indices[] = {  // note that we start from 0!
@@ -28,48 +36,21 @@ unsigned int indices[] = {  // note that we start from 0!
     1, 2, 3   // second Triangle
 };
 
-void redimensionar(GLFWwindow* ventana, int ancho, int alto){
-    glViewport(0,0, ancho, alto);
-}
-
-const char* leerShader(const std::string& rutaArchivo) {
-    std::ifstream archivo(rutaArchivo);
-    if (!archivo) {
-        std::cerr << "No se pudo abrir el archivo." << std::endl;
-        return nullptr;
-    }
-
-    std::string contenido((std::istreambuf_iterator<char>(archivo)),
-                          std::istreambuf_iterator<char>());
-    
-    archivo.close();
-
-    const char* contenidoChar = contenido.c_str();
-    return contenidoChar;
-}
-
-void error_callback(int error, const char* description)
-{
-    fprintf(stderr, "Error: %s\n", description);
-}
+void redimensionar(GLFWwindow* ventana, int ancho, int alto) { glViewport(0,0, ancho, alto); }
+void error_callback(int error, const char* description) { fprintf(stderr, "Error: %s\n", description); }
 
 static void teclado(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
     if (action == GLFW_PRESS){
         switch (key) {
-        case GLFW_KEY_ESCAPE: glfwSetWindowShouldClose(window, GLFW_TRUE);
-            break;
-        
-        default:
-            break;
+        case GLFW_KEY_ESCAPE: glfwSetWindowShouldClose(window, GLFW_TRUE); break;
+        default: break;
         }
     }
 }
 
 int main(void)
 {
-    GLFWwindow* window;
-    
     /* Initialize the library */
     if (!glfwInit()) return -1;
 
@@ -80,7 +61,7 @@ int main(void)
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 
     /* Create a windowed mode window and its OpenGL context */
-    window = glfwCreateWindow(WIDTH, HEIGH, "Hola Amigos", NULL, NULL);
+    GLFWwindow* window = glfwCreateWindow(WIDTH, HEIGH, "Hola Amigos", NULL, NULL);
     if (!window) { glfwTerminate(); return -1; }
 
     glfwSetKeyCallback(window, teclado); //teclado
@@ -103,9 +84,6 @@ int main(void)
     printf("Renderer: %s\n", renderer);
     printf("OpenGL version supported %s\n", version);
 
-    //glViewport(0,0, 800,800);
-
-
 
 
     // VBO VAO EBO //
@@ -118,10 +96,10 @@ int main(void)
     glBindVertexArray(VAO);
 
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_DYNAMIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_DYNAMIC_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
@@ -135,43 +113,21 @@ int main(void)
     glBindVertexArray(0);
 
 
-
-    //Shader
     Shader shader = Shader("shaders/shader.vert", "shaders/shader.frag");
+    Texture textura = Texture(GL_TEXTURE_2D ,"img/cucaracha.png");
 
+    //Transformaciones
 
-    //Texture
-    unsigned int texture; // ID
-    stbi_set_flip_vertically_on_load(true);
-    glGenTextures(1, &texture); //Inicializacion
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, texture); // vinculación
-
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST); //cerca pixeleado
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR); //lejos borroso miopia
-
-    // Pa la ruta de la IMAGEN
-    int witdh, heigh, nrChannels;
-    unsigned char* data = stbi_load("img/piedras.jpg", &witdh, &heigh, &nrChannels, 0);
-
-    if(data){
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, witdh, heigh, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-        glGenerateMipmap(GL_TEXTURE_2D);
-    }
-    else std::cout<<"Ocurrio un error al cargar la textura"<< std::endl;
-
-    stbi_image_free(data);
-
-
-    float temp;
-    int vertColorID = glGetUniformLocation(shader.ID, "move");
-
+    mat4 transformacion = mat4(1.0f); //Matriz de transformación
+    //transformacion = translate(transformacion, vec3(0.3f, 0.2f, 0.0f));
+    //transformacion = rotate(transformacion, radians(45.0f), vec3(0.0, 0.0, 1.0));
+    //transformacion = scale(transformacion, vec3(1.0, 1.0 ,1.0));
+    unsigned int move;
 
     shader.use();
     glBindVertexArray(VAO);
+
+    
 
     /* Loop until the user closes the window */
 
@@ -179,16 +135,12 @@ int main(void)
     while (!glfwWindowShouldClose(window))
     {
         /* Render here */
-        glClearColor(1.0 , 0.2 ,0.2 , 1.0);
+        glClearColor(0.2 , 0.2 ,0.2 , 1.0);
         glClear(GL_COLOR_BUFFER_BIT);
 
-
-
-        temp = 0.5 + (  0.3 * sin (glfwGetTime()) );
-        glUniform1f(vertColorID, temp);
-
-
-        glBindTexture(GL_TEXTURE_2D, texture);
+        textura.bind(GL_TEXTURE_2D);
+        transformacion = rotate(transformacion, radians(-0.5f), vec3(0.0, 0.0, 1.0));
+        glUniformMatrix4fv(move, 1, GL_FALSE, value_ptr(transformacion));
         
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 

@@ -2,8 +2,6 @@
 
 Shader::Shader(const std::string& vertex_file, const std::string& fragment_file){
 
-    std::cout <<"Shader usado, default\n";
-
     char log[512];
     int sucess;
 
@@ -14,7 +12,7 @@ Shader::Shader(const std::string& vertex_file, const std::string& fragment_file)
     glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &sucess);
     if(!sucess){
         glGetShaderInfoLog(vertexShader, 512, NULL, log);
-        std::cout << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n" << log << std::endl;
+        std::cout << "ERROR::SHADER::VERTEX::COMPILATION_FAILED!\n" << log << std::endl;
     }
 
 
@@ -25,7 +23,7 @@ Shader::Shader(const std::string& vertex_file, const std::string& fragment_file)
     glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &sucess);
     if(!sucess){
         glGetShaderInfoLog(fragmentShader, 512, NULL, log);
-        std::cout << "ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n" << log << std::endl;
+        std::cout << "ERROR::SHADER::FRAGMENT::COMPILATION_FAILE!\n" << log << std::endl;
     }
 
     this->ID = glCreateProgram();

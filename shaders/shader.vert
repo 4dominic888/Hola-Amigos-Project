@@ -8,10 +8,10 @@ layout (location = 2) in vec2 aTextureCoord;
 out vec3 color;
 out vec2 TextureCoord;
 
-uniform float move;
+uniform mat4 transformacion;
 
 void main(){
-    gl_Position = vec4(aPos.x, aPos.y - move*0.5, aPos.z, 1.0);
+    gl_Position = transformacion * vec4(aPos, 1.0);
     color = aColor;
     TextureCoord = aTextureCoord;
 }
