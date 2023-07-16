@@ -10,7 +10,7 @@ Texture::Texture(GLenum type ,const char* filename){
     glTexParameteri(type, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
     glTexParameteri(type, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
 
-    glTexParameteri(type, GL_TEXTURE_MIN_FILTER, GL_NEAREST); //cerca pixeleado
+    glTexParameteri(type, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR); //cerca pixeleado
     glTexParameteri(type, GL_TEXTURE_MAG_FILTER, GL_LINEAR); //lejos borroso miopia asdasd
 
 
@@ -22,7 +22,7 @@ Texture::Texture(GLenum type ,const char* filename){
         glTexImage2D(type, 0, GL_RGBA, witdh, heigh, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
         glGenerateMipmap(type);
     }
-    else std::cout<<"Ocurrio un error al cargar la textura"<< std::endl;
+    else std::cout<<"Ocurrio un error al cargar la textura, revise el codigo"<< std::endl;
 
     stbi_image_free(data);
 }
