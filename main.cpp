@@ -29,11 +29,6 @@ float vertices[] = {
      0.5f, -0.5f,  0.0f,    1.0f, 0.0f,   0.0f, 0.0f,  1.0f,
      0.5f,  0.5f,  0.0f,    1.0f, 1.0f,   0.0f, 0.0f,  1.0f,
     -0.5f,  0.5f,  0.0f,    0.0f, 1.0f,   0.0f, 0.0f,  1.0f
-
-    -0.5f, -0.5f,  0.5f,    0.0f, 0.0f,   0.0f, 0.0f, -1.0f,
-     0.5f, -0.5f,  0.5f,    1.0f, 0.0f,   0.0f, 0.0f, -1.0f,
-     0.5f,  0.5f,  0.5f,    1.0f, 1.0f,   0.0f, 0.0f, -1.0f,
-    -0.5f,  0.5f,  0.5f,    0.0f, 1.0f,   0.0f, 0.0f, -1.0f
 };
 
 unsigned int indices[] = {  // note that we start from 0!
@@ -61,7 +56,7 @@ unsigned int pyramidIndices[] = {
 
 
 //Camara variables
-Camara camara = Camara(vec3(0.0f, 0.0f, 6.0f));
+Camara camara = Camara(vec3(0.0f, 0.0f, 2.0f));
 float lastX =  (float)WIDTH / 2.0;
 float lastY =  (float)HEIGH / 2.0;
 
@@ -114,6 +109,8 @@ int main(void)
 
     /* Capture Errors in the function error_callback */
     glfwSetErrorCallback(error_callback);
+
+    
 
     /* Establecer minimo y maximo la version de OpenGL utilizable */
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -207,8 +204,11 @@ int main(void)
 
 
     //luces
-    vec3 posicionLuz = vec3(0.0f, 1.0f, 2.0f);
+    vec3 posicionLuz = vec3(0.0f, 0.0f, 2.0f);
     vec3 colorLuz = vec3(1.0f, 1.0f, 1.0f);
+
+    vec3 ambiental = colorLuz * vec3(0.6f);
+    vec3 difuso = colorLuz * vec3(0.1f);
 
     //vec3 luzDifusa;
 
@@ -236,7 +236,7 @@ int main(void)
         teclado(window);
 
         /* Render here */
-        glClearColor(0.2 , 0.2 ,0.2 , 1.0);
+        glClearColor(0.18, 0.19, 0.21, 1.0);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); //igual profundidad
 
 
@@ -245,22 +245,25 @@ int main(void)
         shader.setMat4("projeccion", projeccion);
         shader.setMat4("vista", vista);
 
-        shader.setVec3("posicionLuz", posicionLuz);
-        shader.setVec3("colorLuz", colorLuz);
+
+        shader.setVec3("luz.posicion", posicionLuz);
+        shader.setVec3("posicionVista", camara.Position);
+
+        shader.setVec3("luz.ambiental", ambiental);
+        shader.setVec3("luz.difusa", difuso);
+        shader.setVec3("luz.especular", 0.5f, 0.5f, 0.5f);
+
+        shader.setVec3("material.ambiental", 1.0f, 1.0f, 1.0f);
+        shader.setVec3("material.difusa", 1.0f, 0.82f, 0.82f);
+        shader.setVec3("material.especular", 0.73f, 0.72f, 0.74f);
+
+        shader.setfloat("material.brillo", 0.3f);
 
         modelo = mat4(1.0f);
-        pymodelo = mat4(1.0f);
-          
-
-        modelo = mat4(1.0f);
-        modelo = translate(modelo, vec3(1.0f, 0.0f, 1.0f));
-        modelo = rotate(modelo, radians(90.0f), vec3(0.0f, 1.0f, 0.0f));
-        shader.setMat4("modelo", modelo);
-        glBindVertexArray(VAO);
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+        
         
         modelo = mat4(1.0f);
-        //modelo = rotate(modelo, radians((float)glfwGetTime()*500), vec3(0.0, 1.0, 0.0));
+        modelo = rotate(modelo, radians((float)glfwGetTime()*100), vec3(0.0, 1.0, 0.0));
         shader.setMat4("modelo", modelo);
         textura.bind(GL_TEXTURE0 ,GL_TEXTURE_2D); 
         glBindVertexArray(VAO);
@@ -268,13 +271,21 @@ int main(void)
 
 
 
+        //foco
         lightShader.use();
+        pymodelo = mat4(1.0f);
+
+        lightShader.setVec3("colorLuz", colorLuz);
+
         lightShader.setMat4("projeccion", projeccion);
         lightShader.setMat4("vista", vista);
+
         pymodelo = translate(pymodelo, posicionLuz);
+
         lightShader.setMat4("modelo", pymodelo);
-        glBindVertexArray(pyVAO);
-        glDrawElements(GL_TRIANGLES, 18, GL_UNSIGNED_INT, 0);
+        
+        //glBindVertexArray(pyVAO);
+        //glDrawElements(GL_TRIANGLES, 18, GL_UNSIGNED_INT, 0);
 
         //glDrawArrays(GL_TRIANGLES, 0, 6);
 
