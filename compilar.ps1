@@ -25,7 +25,7 @@ try{
     Set-Content -Path $output_file -Value "Halo, teri teri"
 
     if($salidaO -eq "nada") {
-        g++ main.cpp obj/*.o -o "Hola Amigos.exe" -lglfw3 -lopengl32 -lgdi32 -lglad
+        g++ main.cpp obj/*.o -o "Hola Amigos.exe" -lglfw3 -lopengl32 -lgdi32 -lglad -lwinmm
         if ($LASTEXITCODE -eq 0) {
             Start-Process -FilePath "Hola Amigos.exe"
         }

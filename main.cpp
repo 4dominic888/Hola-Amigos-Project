@@ -12,6 +12,9 @@
 #include <stdio.h>
 #include <iostream>
 #include <math.h>
+#include <windows.h>
+#include <mmsystem.h>
+#include <random>
 
 //Include creados
 #include "include/Shader.hpp"
@@ -64,6 +67,12 @@ bool firstMouse = true;
 float deltaTime = 0.0f;	// time between current frame and last frame
 float lastFrame = 0.0f;
 
+float randomInRange(float min, float max) {
+    static std::random_device rd;
+    static std::mt19937 gen(rd());
+    std::uniform_real_distribution<float> dis(min, max);
+    return dis(gen);
+}
 
 void redimensionar(GLFWwindow* ventana, int ancho, int alto) { glViewport(0,0, ancho, alto); }
 void error_callback(int error, const char* description) { fprintf(stderr, "Error: %s\n", description); }
@@ -110,8 +119,6 @@ int main(void)
     /* Capture Errors in the function error_callback */
     glfwSetErrorCallback(error_callback);
 
-    
-
     /* Establecer minimo y maximo la version de OpenGL utilizable */
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
@@ -126,6 +133,7 @@ int main(void)
     glfwSetCursorPosCallback(window, mouse); //pal mousse
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED); //mouse config
 
+    sndPlaySound("img/freebird.wav", SND_ASYNC | SND_FILENAME | SND_LOOP);
 
     // glad: load all OpenGL function pointers
     // ---------------------------------------
@@ -219,19 +227,24 @@ int main(void)
     mat4 projeccion = perspective(radians(45.0f), (float)(WIDTH) / (float)(HEIGH), 0.1f, 100.0f);
 
     //shader usado
-    
+    float randomAngleX = randomInRange(0.0f, 360.0f);
+    float randomAngleY = randomInRange(0.0f, 360.0f);
+    float randomAngleZ = randomInRange(0.0f, 360.0f);
 
     glUniform1i(glGetUniformLocation(shader.ID, "la_textura"), 0);
 
+    float velocidad = 100;
+    float currentFrame;
+    int frame;
 
     /* Loop until the user closes the window */
     glfwSwapInterval(1); //Para evitar lag
     while (!glfwWindowShouldClose(window))
     {
-        float currentFrame = glfwGetTime();
+        currentFrame = glfwGetTime();
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
-    
+        frame++;
 
         teclado(window);
 
@@ -239,6 +252,9 @@ int main(void)
         glClearColor(0.18, 0.19, 0.21, 1.0);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); //igual profundidad
 
+        if(frame > 800) velocidad = 800;
+        if(frame > 1170) velocidad = 1600;
+        if(frame > 1780) {velocidad = 100; return 0;}
 
         shader.use();
         vista = camara.GetVistaMatrix();
@@ -258,12 +274,11 @@ int main(void)
         shader.setVec3("material.especular", 0.73f, 0.72f, 0.74f);
 
         shader.setfloat("material.brillo", 0.3f);
-
-        modelo = mat4(1.0f);
-        
         
         modelo = mat4(1.0f);
-        modelo = rotate(modelo, radians((float)glfwGetTime()*100), vec3(0.0, 1.0, 0.0));
+        modelo = rotate(modelo, radians((float)glfwGetTime()*velocidad), vec3(1.0, 0.0, 0.0));
+        modelo = rotate(modelo, radians((float)glfwGetTime()*velocidad), vec3(0.0, 1.0, 0.0));
+        modelo = rotate(modelo, radians((float)glfwGetTime()*velocidad), vec3(0.0, 0.0, 1.0));
         shader.setMat4("modelo", modelo);
         textura.bind(GL_TEXTURE0 ,GL_TEXTURE_2D); 
         glBindVertexArray(VAO);
@@ -277,12 +292,10 @@ int main(void)
 
         lightShader.setVec3("colorLuz", colorLuz);
 
-        lightShader.setMat4("projeccion", projeccion);
-        lightShader.setMat4("vista", vista);
-
-        pymodelo = translate(pymodelo, posicionLuz);
-
-        lightShader.setMat4("modelo", pymodelo);
+        //lightShader.setMat4("projeccion", projeccion);
+        //lightShader.setMat4("vista", vista);
+        //pymodelo = translate(pymodelo, posicionLuz);
+        //lightShader.setMat4("modelo", pymodelo);
         
         //glBindVertexArray(pyVAO);
         //glDrawElements(GL_TRIANGLES, 18, GL_UNSIGNED_INT, 0);
