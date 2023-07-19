@@ -8,7 +8,7 @@ class Texture{
     public:
         unsigned int ID;
         Texture(GLenum type ,const char* filename);
-        void bind(GLenum texture);
+        void bind(GLenum numTexture, GLenum texture);
 };
 
 #endif

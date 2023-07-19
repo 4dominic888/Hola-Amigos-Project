@@ -27,7 +27,7 @@ Texture::Texture(GLenum type ,const char* filename){
     stbi_image_free(data);
 }
 
-void Texture::bind(GLenum texture){
-    glActiveTexture(texture);
+void Texture::bind(GLenum numTexture, GLenum texture){
+    glActiveTexture(numTexture);
     glBindTexture(texture, ID);
 }

@@ -45,7 +45,7 @@ Shader::Shader(const std::string& vertex_file, const std::string& fragment_file)
 const char* Shader::leerShader(const std::string& rutaArchivo){
     std::ifstream archivo(rutaArchivo);
     if (!archivo) {
-        std::cerr << "No se pudo abrir el archivo." << std::endl;
+        std::cerr << "No se pudo abrir el archivo..." << std::endl;
         return nullptr;
     }
 
@@ -64,6 +64,10 @@ void Shader::setMat4(const std::string &name, glm::mat4 &mat) const {
 
 void Shader::setVec4(const std::string &name, glm::vec4 &vec) const {
     glUniform4f(glGetUniformLocation(ID, name.c_str()), vec.x, vec.y, vec.z, vec.w);
+}
+
+void Shader::setVec3(const std::string &name, glm::vec3 &vec) const{
+    glUniform3f(glGetUniformLocation(ID, name.c_str()), vec.x, vec.y, vec.z);
 }
 
 void Shader::use(){
